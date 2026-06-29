@@ -4,6 +4,8 @@ from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from flask_marshmallow import Marshmallow
+from marshmallow import Schema, fields, validate, ValidationError
+from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
 from sqlalchemy import DateTime, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import relationship
 from datetime import datetime
@@ -20,6 +22,7 @@ db = SQLAlchemy(app)
 ma = Marshmallow(app)
 CORS(app)
 
+# ===== MODELS/TABLES =====
 class User(db.Model):
     __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -49,6 +52,37 @@ class OrderProduct(db.Model):
     __table_args__ = (
         UniqueConstraint('order_id', 'product_id', name='unique_order_product'),
     )
+
+# ===== SCHEMAS =====
+class UserSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = User
+        load_instance = True
+        include_fk = True
+    
+    name = fields.String(required=True, validate=validate.Length(min=1, max=100))
+    email = fields.Email(required=True)
+    address = fields.String(allow_none=True)
+
+
+class ProductSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = Product
+        load_instance = True
+        include_fk = True
+    
+    product_name = fields.String(required=True, validate=validate.Length(min=1, max=100))
+    price = fields.Float(required=True, validate=validate.Range(min=0))
+
+
+class OrderSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = Order
+        load_instance = True
+        include_fk = True
+    
+    order_date = fields.DateTime(required=True)
+    user_id = fields.Integer(required=True)
 
 if __name__ == '__main__':
     with app.app_context():
