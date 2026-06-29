@@ -26,19 +26,18 @@ class User(db.Model):
     name = db.Column(db.String(100), nullable=False)
     address = db.Column(db.String(255))
     email = db.Column(db.String(100), unique=True, nullable=False)
-    
     orders = relationship('Order', backref='user', cascade='all, delete-orphan')
 
 class Product(db.Model):
     __tablename__ = 'product'
-    id = db.Column(db.Integer, primarykey=True, autoincrement=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     product_name = db.Column(db.String(100), nullable=False)
     price = db.Column(db.Float, nullable=False)
 
 class Order(db.Model):
     __tablename__ = 'order'
-    id = db.Column(db.Integer, primarykey=True, autoincrement=True)
-    order_date = db.Column(DateTime, default=datetime.utcnow)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    order_date = db.Column(DateTime, default=datetime.utcnow, nullable=False)
     user_id = db.Column(db.Integer, ForeignKey('user.id'), nullable=False)
     products = relationship('Product', secondary='order_product', backref='orders')
 
@@ -47,21 +46,11 @@ class OrderProduct(db.Model):
     order_id = db.Column(db.Integer, ForeignKey('order.id'), primary_key=True)
     product_id = db.Column(db.Integer, ForeignKey('product.id'), primary_key=True)
 
+    __table_args__ = (
+        UniqueConstraint('order_id', 'product_id', name='unique_order_product'),
+    )
+
 if __name__ == '__main__':
     with app.app_context():
-        try:
-            print("🔨 Creating all tables...")
-            db.create_all()
-            print("✅ Tables created successfully!")
-            
-            # Verify tables exist
-            inspector = db.inspect(db.engine)
-            tables = inspector.get_table_names()
-            print(f"📊 Tables in database: {tables}")
-            
-        except Exception as e:
-            print(f"❌ ERROR: {e}")
-            import traceback
-            traceback.print_exc()
-    
+        db.create_all()
     app.run(debug=True)
