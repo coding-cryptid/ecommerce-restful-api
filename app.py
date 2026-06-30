@@ -6,6 +6,7 @@ from flask_cors import CORS
 from flask_marshmallow import Marshmallow
 from marshmallow import Schema, fields, validate, ValidationError
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
+from marshmallow_sqlalchemy.fields import Nested
 from sqlalchemy import DateTime, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import relationship
 from datetime import datetime
@@ -83,6 +84,7 @@ class OrderSchema(ma.SQLAlchemyAutoSchema):
     
     order_date = fields.DateTime(required=True)
     user_id = fields.Integer(required=True)
+    products = fields.Nested(ProductSchema, many=True)
 
 # ===== ENDPOINTS =====
 # ===== USER ENDPOINTS =====
