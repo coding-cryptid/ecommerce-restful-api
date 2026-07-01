@@ -1,4 +1,5 @@
 # 🌐 Relational Databases & API Rest Development
+## E-commerce REST API
 A RESTful API built with Flask and SQLAlchemy for managing users, products, and orders with a MySQL database.
  
 ## Features
